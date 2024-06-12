@@ -14,7 +14,7 @@ enum MyEnum {
  * Custom blocks
  */
 //% weight=100 color=#0fbc11 icon=""
-namespace custom {
+namespace MotorEncoder {
     /**
      * TODO: describe your function here
      * @param n describe parameter here, eg: 5
@@ -33,5 +33,16 @@ namespace custom {
     //% block
     export function fib(value: number): number {
         return value <= 1 ? value : fib(value - 1) + fib(value - 2);
+    }
+
+    /**
+     * initialises local variables and enables the rotary encoder.
+     */
+    //% blockId=rotary_ky_init
+    //% block="Connect Encoder PinA %pinA|PinB %pinB"
+    //% icon="\uf1ec"
+    export function init(pinA: DigitalPin, pinB: DigitalPin,): void {
+        ri = pinA;
+        dv = pinB;
     }
 }
