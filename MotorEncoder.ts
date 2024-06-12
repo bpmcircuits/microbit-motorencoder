@@ -1,3 +1,7 @@
+let encA: DigitalPin;
+let encB: DigitalPin;
+let position = 0;
+
 /**
 * Użyj tego pliku, aby zdefiniować niestandardowe funkcje i bloki.
 * Czytaj więcej na https://makecode.microbit.org/blocks/custom
@@ -36,13 +40,45 @@ namespace MotorEncoder {
     }
 
     /**
+     * rotary encoder was rotated.
+     */
+    //% blockId=rotary_ky_rotated_left_event
+    //% block="on rotated |%dir"
+    export function onRotateEvent(dir: RotationDirection, body: () => void): void {
+        serial.setBaudRate(115200);
+        if (dir == RotationDirection.Left) control.onEvent(rotatedLeftID, dir, body);
+        if (dir == RotationDirection.Right) control.onEvent(rotatedRightID, dir, body);
+        control.inBackground(() => {
+            while (true) {
+                const riValue = pins.digitalReadPin(encA);
+                const dvValue = pins.digitalReadPin(encB);
+                if (riValue == 1 && dvValue == 1) rotateReady = true;
+                else if (rotateReady) {
+                    if (riValue == 1 && dvValue == 0) {
+                        serial.writeLine("Right!");
+                        position += 1;
+                        rotateReady = false;
+                        control.raiseEvent(rotatedRightID, RotationDirection.Right);
+                    }
+                    else if (riValue == 0 && dvValue == 1) {
+                        serial.writeLine("Left!")
+                        position -= 1;
+                        rotateReady = false;
+                        control.raiseEvent(rotatedLeftID, RotationDirection.Left);
+                    }
+                }
+                basic.pause(5);
+            }
+        })
+    }
+
+    /**
      * initialises local variables and enables the rotary encoder.
      */
-    //% blockId=rotary_ky_init
-    //% block="Connect Encoder PinA %pinA|PinB %pinB"
+    //% block="Connect Encoder Pin A %pinA|Pin B %pinB"
     //% icon="\uf1ec"
     export function init(pinA: DigitalPin, pinB: DigitalPin,): void {
-        ri = pinA;
-        dv = pinB;
+        encA = pinA;
+        encB = pinB;
     }
 }
